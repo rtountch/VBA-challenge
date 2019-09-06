@@ -1,0 +1,151 @@
+Sub StockSummary()
+    Cells(1, 9) = "Ticker"
+    Cells(1, 10) = "Yearly Change"
+    Cells(1, 11) = "Percent Change"
+    Cells(1, 12) = "Total Stock Volume"
+    
+    
+    
+    Dim I As Long
+    Dim LastRow As Long
+    Dim NextLine As Integer
+    
+    LastRow = Range("A" & Rows.Count).End(xlUp).Row
+    
+    For I = 2 To LastRow
+        If Cells(I, 1) <> Cells((I - 1), 1) Then
+            NextLine = Range("I" & Rows.Count).End(xlUp).Row + 1
+            Cells(NextLine, 9) = Cells(I, 1)
+        End If
+    Next I
+        
+    Dim LastRowSummary As Long
+    Dim StartAmt As Double
+    Dim EndAmt As Double
+    Dim TotalVolume As Double
+    
+    I = 2
+    
+    LastRowSummary = Range("I" & Rows.Count).End(xlUp).Row
+    For NextLine = 2 To LastRowSummary
+    
+        TotalVolume = 0
+        
+        While I <= LastRow And Cells(NextLine, 9) = Cells(I, 1)
+            If Cells(NextLine, 9) = Cells(I, 1) Then
+                If Cells(I, 2) = "20160101" Then
+                    StartAmt = Cells(I, 3)
+                End If
+                If Cells(I, 2) = "20161230" Then
+                    EndAmt = Cells(I, 6)
+                End If
+                TotalVolume = TotalVolume + Cells(I, 7)
+            End If
+            
+            I = I + 1
+        
+        Wend
+        
+        'Cells(NextLine, 13) = i
+            
+        Cells(NextLine, 10) = EndAmt - StartAmt
+        
+        If Cells(NextLine, 10) < 0 Then
+            Cells(NextLine, 10).Interior.ColorIndex = 3 'Red
+        Else
+            Cells(NextLine, 10).Interior.ColorIndex = 43 'Green
+        End If
+        
+        Cells(NextLine, 11) = (EndAmt - StartAmt) / StartAmt
+        Cells(NextLine, 12) = TotalVolume
+        
+
+
+    Next NextLine
+    
+        
+End Sub
+
+Sub GreatestStock()
+    Cells(1, 15) = "Ticker"
+    Cells(1, 16) = "Value"
+    Cells(2, 14) = "Greatest % Increase"
+    Cells(3, 14) = "Greatest % Decrease"
+    Cells(4, 14) = "Greatest Total Volume"
+    
+    Dim LastRowSummary As Long
+    Dim GreatestPercentIncrease As Double
+    Dim GreatestPercentDecrease As Double
+    Dim GreatestTotalVolume As Double
+    Dim IncreaseTicker As String
+    Dim DecreaseTicker As String
+    Dim VolumeTicker As String
+        
+    GreatestPercentIncrease = Cells(2, 11)
+    IncreaseTicker = Cells(2, 9)
+    
+    GreatestPercentDecrease = Cells(2, 11)
+    DecreaseTicker = Cells(2, 9)
+    
+    GreatestTotalVolume = Cells(2, 12)
+    VolumeTicker = Cells(2, 9)
+    
+    LastRowSummary = Range("I" & Rows.Count).End(xlUp).Row
+    For NextLine = 2 To LastRowSummary
+    
+        If Cells(NextLine, 11) > GreatestPercentIncrease Then
+            GreatestPercentIncrease = Cells(NextLine, 11)
+            IncreaseTicker = Cells(NextLine, 9)
+        End If
+    
+        If Cells(NextLine, 11) < GreatestPercentDecrease Then
+            GreatestPercentDecrease = Cells(NextLine, 11)
+            DecreaseTicker = Cells(NextLine, 9)
+        End If
+        
+        If Cells(NextLine, 12) > GreatestTotalVolume Then
+            GreatestTotalVolume = Cells(NextLine, 12)
+            VolumeTicker = Cells(NextLine, 9)
+        End If
+        
+        
+
+    Next NextLine
+    
+    
+    Cells(2, 15) = IncreaseTicker
+    Cells(2, 16) = GreatestPercentIncrease
+    
+    Cells(3, 15) = DecreaseTicker
+    Cells(3, 16) = GreatestPercentDecrease
+    
+    Cells(4, 15) = VolumeTicker
+    Cells(4, 16) = GreatestTotalVolume
+    
+End Sub
+
+
+
+Sub ProcessAllSheets()
+    
+    Dim WS_Count As Integer
+    Dim I As Integer
+         
+    WS_Count = ActiveWorkbook.Worksheets.Count
+
+    For I = 1 To WS_Count
+    
+        Call StockSummary
+        Call GreatestStock
+            
+        If ActiveSheet.Index = Worksheets.Count Then
+            Worksheets(1).Activate
+        Else
+            ActiveSheet.Next.Activate
+        End If
+
+    Next I
+    
+
+End Sub
+
